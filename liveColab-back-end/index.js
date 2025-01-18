@@ -24,9 +24,7 @@ const port = process.env.PORT || 5000;
 // app.use(cors());
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-    ],
+    origin: ["http://localhost:5173"],
     credentials: true,
   })
 );
@@ -127,6 +125,25 @@ async function run() {
       const query = { email: email };
       const user = await userData.findOne(query);
       res.send(user);
+    });
+
+    //api for getting data from xlsx file from front end
+    // Configure multer for file uploads (optional, if you want to upload the raw file)
+    const upload = multer();
+
+    app.post("/api/saveData", upload.none(), (req, res) => {
+      // upload.none() if you are sending parsed JSON
+      try {
+        const dataToSave = req.body; // Data sent from the frontend
+        const jsonData = JSON.stringify(dataToSave, null, 2); // Format JSON
+
+        fs.writeFileSync("data.json", jsonData); // Save to data.json
+
+        res.status(200).json({ message: "Data saved successfully" });
+      } catch (error) {
+        console.error("Error saving data:", error);
+        res.status(500).json({ message: "Error saving data" });
+      }
     });
 
     //api to get a single user data for admin
